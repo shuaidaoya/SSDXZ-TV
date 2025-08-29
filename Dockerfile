@@ -1,7 +1,7 @@
 FROM node:lts-alpine
 
-LABEL maintainer="LibreTV Team"
-LABEL description="LibreTV - 免费在线视频搜索与观看平台"
+LABEL maintainer="像素圣殿 Team"
+LABEL description="像素圣殿 - 免费在线视频搜索与观看平台"
 
 # 设置环境变量
 ENV PORT=8080

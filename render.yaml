@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: libretv
+    name: 像素圣殿
     runtime: node
     plan: free
     buildCommand: 'npm install'
