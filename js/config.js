@@ -14,7 +14,7 @@ const PASSWORD_CONFIG = {
 // 网站信息配置
 const SITE_CONFIG = {
     name: '像素圣殿',
-    url: 'https://像素圣殿.is-an.org',
+    url: 'https://tv.ssdxz.cn',
     description: '免费在线视频搜索与观看平台',
     logo: 'image/logo.png',
     version: '1.0.3'
