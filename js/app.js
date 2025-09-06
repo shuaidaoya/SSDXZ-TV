@@ -616,22 +616,12 @@ function getCustomApiInfo(customApiIndex) {
 
 // 搜索功能 - 修改为支持多选API和多页结果
 async function search() {
-    // 强化的密码保护校验 - 防止绕过
-    try {
-        if (window.ensurePasswordProtection) {
-            window.ensurePasswordProtection();
-        } else {
-            // 兼容性检查
-            if (window.isPasswordProtected && window.isPasswordVerified) {
-                if (window.isPasswordProtected() && !window.isPasswordVerified()) {
-                    showPasswordModal && showPasswordModal();
-                    return;
-                }
-            }
+       // 密码保护校验
+    if (window.isPasswordProtected && window.isPasswordVerified) {
+        if (window.isPasswordProtected() && !window.isPasswordVerified()) {
+            showPasswordModal && showPasswordModal();
+            return;
         }
-    } catch (error) {
-        console.warn('Password protection check failed:', error.message);
-        return;
     }
     const query = document.getElementById('searchInput').value.trim();
 
@@ -908,7 +898,15 @@ async function showDetails(id, vod_name, sourceCode) {
         const timestamp = new Date().getTime();
         const cacheBuster = `&_t=${timestamp}`;
         const response = await fetch(`/api/detail?id=${encodeURIComponent(id)}${apiParams}${cacheBuster}`);
-
+        
+        // 检查HTTP状态码
+        if (response.status === 401) {
+            // 密码验证失败，显示密码验证提示
+            showPasswordModal && showPasswordModal();
+            hideLoading();
+            return;
+        }
+        
         const data = await response.json();
 
         const modal = document.getElementById('modal');

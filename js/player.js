@@ -1746,6 +1746,14 @@ async function switchToResource(sourceKey, vodId) {
         const cacheBuster = `&_t=${timestamp}`;
         const response = await fetch(`/api/detail?id=${encodeURIComponent(vodId)}${apiParams}${cacheBuster}`);
         
+        // 检查HTTP状态码
+        if (response.status === 401) {
+            // 密码验证失败，显示密码验证提示
+            showToast('需要密码验证才能访问资源', 'error');
+            hideLoading();
+            return;
+        }
+        
         const data = await response.json();
         
         if (!data.episodes || data.episodes.length === 0) {

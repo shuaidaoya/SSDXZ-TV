@@ -553,7 +553,15 @@ async function handleMultipleCustomSearch(searchQuery, customApiUrls) {
         if (requestUrl.pathname.startsWith('/api/')) {
             if (window.isPasswordProtected && window.isPasswordVerified) {
                 if (window.isPasswordProtected() && !window.isPasswordVerified()) {
-                    return;
+                    return new Response(JSON.stringify({
+                        code: 401,
+                        msg: '需要密码验证',
+                    }), {
+                        status: 401,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    });
                 }
             }
             try {
