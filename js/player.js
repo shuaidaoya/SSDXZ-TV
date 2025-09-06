@@ -110,6 +110,23 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('passwordVerified', () => {
     document.getElementById('player-loading').style.display = 'block';
 
+    // 在密码验证成功后，确保URL参数仍然有效
+    // 保存当前URL参数到localStorage，以便在initializePageContent中恢复
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoUrl = urlParams.get('url');
+    const title = urlParams.get('title');
+    const sourceCode = urlParams.get('source');
+    const index = urlParams.get('index');
+    const episodes = urlParams.get('episodes');
+    const position = urlParams.get('position');
+    
+    if (videoUrl) localStorage.setItem('temp_videoUrl', videoUrl);
+    if (title) localStorage.setItem('temp_title', title);
+    if (sourceCode) localStorage.setItem('temp_sourceCode', sourceCode);
+    if (index) localStorage.setItem('temp_index', index);
+    if (episodes) localStorage.setItem('temp_episodes', episodes);
+    if (position) localStorage.setItem('temp_position', position);
+
     initializePageContent();
 });
 
@@ -124,6 +141,37 @@ function initializePageContent() {
     let index = parseInt(urlParams.get('index') || '0');
     const episodesList = urlParams.get('episodes'); // 从URL获取集数信息
     const savedPosition = parseInt(urlParams.get('position') || '0'); // 获取保存的播放位置
+    
+    // 如果在密码验证后URL参数丢失，尝试从localStorage恢复
+    if (!videoUrl) {
+        videoUrl = localStorage.getItem('temp_videoUrl') || '';
+        if (videoUrl) {
+            // 更新URL以包含恢复的参数
+            const url = new URL(window.location.href);
+            url.searchParams.set('url', videoUrl);
+            if (!title) {
+                const tempTitle = localStorage.getItem('temp_title');
+                if (tempTitle) url.searchParams.set('title', tempTitle);
+            }
+            if (!sourceCode) {
+                const tempSourceCode = localStorage.getItem('temp_sourceCode');
+                if (tempSourceCode) url.searchParams.set('source', tempSourceCode);
+            }
+            if (index === 0) {
+                const tempIndex = localStorage.getItem('temp_index');
+                if (tempIndex) url.searchParams.set('index', tempIndex);
+            }
+            if (!episodesList) {
+                const tempEpisodes = localStorage.getItem('temp_episodes');
+                if (tempEpisodes) url.searchParams.set('episodes', tempEpisodes);
+            }
+            if (savedPosition === 0) {
+                const tempPosition = localStorage.getItem('temp_position');
+                if (tempPosition) url.searchParams.set('position', tempPosition);
+            }
+            window.history.replaceState({}, '', url);
+        }
+    }
     // 解决历史记录问题：检查URL是否是player.html开头的链接
     // 如果是，说明这是历史记录重定向，需要解析真实的视频URL
     if (videoUrl && videoUrl.includes('player.html')) {
@@ -279,6 +327,14 @@ function initializePageContent() {
             clearInterval(waitForVideo);
         }
     }, 200);
+    
+    // 清理临时存储的URL参数
+    localStorage.removeItem('temp_videoUrl');
+    localStorage.removeItem('temp_title');
+    localStorage.removeItem('temp_sourceCode');
+    localStorage.removeItem('temp_index');
+    localStorage.removeItem('temp_episodes');
+    localStorage.removeItem('temp_position');
 }
 
 // 处理键盘快捷键
@@ -401,9 +457,6 @@ function initPlayer(videoUrl) {
     if (!videoUrl) {
         return
     }
-    
-    // 将视频URL通过服务器代理处理
-    const proxyUrl = '/proxy/' + encodeURIComponent(videoUrl);
 
     // 销毁旧实例
     if (art) {
@@ -443,7 +496,7 @@ function initPlayer(videoUrl) {
     // Create new ArtPlayer instance
     art = new Artplayer({
         container: '#player',
-        url: proxyUrl,
+        url: videoUrl,
         type: 'm3u8',
         title: videoTitle,
         volume: 0.8,
@@ -512,7 +565,7 @@ function initPlayer(videoUrl) {
                     }
                 });
 
-                hls.loadSource(proxyUrl);
+                hls.loadSource(url);
                 hls.attachMedia(video);
 
                 // enable airplay, from https://github.com/video-dev/hls.js/issues/5989
@@ -520,11 +573,11 @@ function initPlayer(videoUrl) {
                 let sourceElement = video.querySelector('source');
                 if (sourceElement) {
                     // 更新现有source元素的URL
-                    sourceElement.src = proxyUrl;
+                    sourceElement.src = videoUrl;
                 } else {
                     // 创建新的source元素
                     sourceElement = document.createElement('source');
-                    sourceElement.src = proxyUrl;
+                    sourceElement.src = videoUrl;
                     video.appendChild(sourceElement);
                 }
                 video.disableRemotePlayback = false;
@@ -815,7 +868,10 @@ function showError(message) {
     const loadingEl = document.getElementById('player-loading');
     if (loadingEl) loadingEl.style.display = 'none';
     const errorEl = document.getElementById('error');
-    if (errorEl) errorEl.style.display = 'flex';
+    if (errorEl) {
+        errorEl.style.display = 'flex';
+        console.log('显示错误:', message); // 调试信息
+    }
     const errorMsgEl = document.getElementById('error-message');
     if (errorMsgEl) errorMsgEl.textContent = message;
 }

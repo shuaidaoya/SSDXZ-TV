@@ -113,7 +113,7 @@ async function handleApiRequest(url) {
             const timeoutId = setTimeout(() => controller.abort(), 10000);
             
             try {
-                const response = await fetch(PROXY_URL + encodeURIComponent(detailUrl), {
+                const response = await fetch(PROXY_URL + encodeURIComponent(apiUrl), {
                     headers: API_CONFIG.detail.headers,
                     signal: controller.signal
                 });
