@@ -401,6 +401,9 @@ function initPlayer(videoUrl) {
     if (!videoUrl) {
         return
     }
+    
+    // 将视频URL通过服务器代理处理
+    const proxyUrl = '/proxy/' + encodeURIComponent(videoUrl);
 
     // 销毁旧实例
     if (art) {
@@ -440,7 +443,7 @@ function initPlayer(videoUrl) {
     // Create new ArtPlayer instance
     art = new Artplayer({
         container: '#player',
-        url: videoUrl,
+        url: proxyUrl,
         type: 'm3u8',
         title: videoTitle,
         volume: 0.8,
@@ -509,7 +512,7 @@ function initPlayer(videoUrl) {
                     }
                 });
 
-                hls.loadSource(url);
+                hls.loadSource(proxyUrl);
                 hls.attachMedia(video);
 
                 // enable airplay, from https://github.com/video-dev/hls.js/issues/5989
@@ -517,11 +520,11 @@ function initPlayer(videoUrl) {
                 let sourceElement = video.querySelector('source');
                 if (sourceElement) {
                     // 更新现有source元素的URL
-                    sourceElement.src = videoUrl;
+                    sourceElement.src = proxyUrl;
                 } else {
                     // 创建新的source元素
                     sourceElement = document.createElement('source');
-                    sourceElement.src = videoUrl;
+                    sourceElement.src = proxyUrl;
                     video.appendChild(sourceElement);
                 }
                 video.disableRemotePlayback = false;
@@ -1745,14 +1748,6 @@ async function switchToResource(sourceKey, vodId) {
         const timestamp = new Date().getTime();
         const cacheBuster = `&_t=${timestamp}`;
         const response = await fetch(`/api/detail?id=${encodeURIComponent(vodId)}${apiParams}${cacheBuster}`);
-        
-        // 检查HTTP状态码
-        if (response.status === 401) {
-            // 密码验证失败，显示密码验证提示
-            showToast('需要密码验证才能访问资源', 'error');
-            hideLoading();
-            return;
-        }
         
         const data = await response.json();
         

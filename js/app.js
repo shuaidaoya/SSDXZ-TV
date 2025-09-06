@@ -898,15 +898,7 @@ async function showDetails(id, vod_name, sourceCode) {
         const timestamp = new Date().getTime();
         const cacheBuster = `&_t=${timestamp}`;
         const response = await fetch(`/api/detail?id=${encodeURIComponent(id)}${apiParams}${cacheBuster}`);
-        
-        // 检查HTTP状态码
-        if (response.status === 401) {
-            // 密码验证失败，显示密码验证提示
-            showPasswordModal && showPasswordModal();
-            hideLoading();
-            return;
-        }
-        
+
         const data = await response.json();
 
         const modal = document.getElementById('modal');

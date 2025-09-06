@@ -113,7 +113,7 @@ async function handleApiRequest(url) {
             const timeoutId = setTimeout(() => controller.abort(), 10000);
             
             try {
-                const response = await fetch(PROXY_URL + encodeURIComponent(apiUrl), {
+                const response = await fetch(PROXY_URL + encodeURIComponent(detailUrl), {
                     headers: API_CONFIG.detail.headers,
                     signal: controller.signal
                 });
@@ -553,15 +553,7 @@ async function handleMultipleCustomSearch(searchQuery, customApiUrls) {
         if (requestUrl.pathname.startsWith('/api/')) {
             if (window.isPasswordProtected && window.isPasswordVerified) {
                 if (window.isPasswordProtected() && !window.isPasswordVerified()) {
-                    return new Response(JSON.stringify({
-                        code: 401,
-                        msg: '需要密码验证',
-                    }), {
-                        status: 401,
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                    });
+                    return;
                 }
             }
             try {
