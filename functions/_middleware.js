@@ -17,6 +17,9 @@ export async function onRequest(context) {
     html = html.replace('window.__ENV__.PASSWORD = "{{PASSWORD}}";', 
       `window.__ENV__.PASSWORD = "${passwordHash}";`);
 
+    // 移除 ADMINPASSWORD 占位符
+    html = html.replace('window.__ENV__.ADMINPASSWORD = "{{ADMINPASSWORD}}";',
+      'window.__ENV__.ADMINPASSWORD = "";');
     // 处理管理员密码 - 确保这部分代码被执行
     const adminPassword = env.ADMINPASSWORD || "";
     let adminPasswordHash = "";
